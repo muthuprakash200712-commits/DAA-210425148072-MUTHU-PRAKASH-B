@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MST using Kruskal's & Prim's Algorithm</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#74ebd5,#9face6);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:800px;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    color:#2c3e50;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:25px;
+}
+
+.input-group{
+    margin-bottom:15px;
+}
+
+label{
+    font-weight:bold;
+    display:block;
+    margin-bottom:5px;
+}
+
+input, textarea, select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+
+textarea{
+    resize:none;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#3498db;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+button:hover{
+    background:#2980b9;
+}
+
+.result{
+    margin-top:20px;
+    padding:15px;
+    background:#f4f9ff;
+    border-left:5px solid #3498db;
+    border-radius:8px;
+}
+
+pre{
+    white-space:pre-wrap;
+    font-size:15px;
+}
+
+.example{
+    margin-top:15px;
+    color:#555;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Minimum Spanning Tree</h1>
+    <p class="subtitle">
+        Kruskal's & Prim's Algorithm
+    </p>
+
+    <div class="input-group">
+        <label>Number of Nodes</label>
+        <input type="number" id="nodes" placeholder="Example: 4">
+    </div>
+
+    <div class="input-group">
+        <label>Number of Edges</label>
+        <input type="number" id="edges" placeholder="Example: 5">
+    </div>
+
+    <div class="input-group">
+        <label>Select Algorithm</label>
+        <select id="algorithm">
+            <option value="kruskal">Kruskal's Algorithm</option>
+            <option value="prim">Prim's Algorithm</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Enter Edge Details</label>
+        <textarea id="graphInput" rows="8"
+placeholder="0 1 10
+0 2 6
+0 3 5
+1 3 15
+2 3 4"></textarea>
+    </div>
+
+    <button onclick="generateMST()">
+        Generate MST
+    </button>
+
+    <div class="result">
+        <h3>Output</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <div class="example">
+        Format:<br>
+        Source Destination Weight<br><br>
+
+        Example:<br>
+        0 1 10<br>
+        0 2 6<br>
+        0 3 5<br>
+        1 3 15<br>
+        2 3 4
+    </div>
+
+</div>
+
+<script>
+
+// ---------- KRUSKAL ----------
+
+class DisjointSet {
+    constructor(n){
+        this.parent = Array.from({length:n}, (_,i)=>i);
+    }
+
+    find(x){
+        if(this.parent[x] !== x){
+            this.parent[x] = this.find(this.parent[x]);
+        }
+        return this.parent[x];
+    }
+
+    union(x,y){
+        this.parent[this.find(x)] = this.find(y);
+    }
+}
+
+function kruskal(nodes, edges){
+
+    edges.sort((a,b)=>a.w-b.w);
+
+    let ds = new DisjointSet(nodes);
+
+    let mst = [];
+    let totalCost = 0;
+
+    for(let edge of edges){
+
+        let u = edge.u;
+        let v = edge.v;
+
+        if(ds.find(u) !== ds.find(v)){
+
+            ds.union(u,v);
+
+            mst.push(edge);
+            totalCost += edge.w;
+        }
+    }
+
+    return {mst,totalCost};
+}
+
+// ---------- PRIM ----------
+
+function prim(nodes, edges){
+
+    let graph = Array.from({length:nodes}, ()=>[]);
+
+    for(let e of edges){
+        graph[e.u].push([e.v,e.w]);
+        graph[e.v].push([e.u,e.w]);
+    }
+
+    let visited = Array(nodes).fill(false);
+
+    visited[0] = true;
+
+    let mst = [];
+    let totalCost = 0;
+
+    while(mst.length < nodes-1){
+
+        let minEdge = null;
+
+        for(let u=0; u<nodes; u++){
+
+            if(visited[u]){
+
+                for(let [v,w] of graph[u]){
+
+                    if(!visited[v]){
+
+                        if(minEdge === null || w < minEdge.w){
+
+                            minEdge = {
+                                u,v,w
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        if(minEdge === null) break;
+
+        visited[minEdge.v] = true;
+
+        mst.push(minEdge);
+        totalCost += minEdge.w;
+    }
+
+    return {mst,totalCost};
+}
+
+// ---------- MAIN ----------
+
+function generateMST(){
+
+    let nodes =
+        parseInt(document.getElementById("nodes").value);
+
+    let lines =
+        document.getElementById("graphInput")
+        .value.trim()
+        .split("\n");
+
+    let edges = [];
+
+    for(let line of lines){
+
+        let [u,v,w] =
+            line.split(" ").map(Number);
+
+        edges.push({u,v,w});
+    }
+
+    let algorithm =
+        document.getElementById("algorithm").value;
+
+    let result;
+
+    if(algorithm === "kruskal"){
+        result = kruskal(nodes, edges);
+    }
+    else{
+        result = prim(nodes, edges);
+    }
+
+    let output =
+        "Minimum Spanning Tree:\n\n";
+
+    result.mst.forEach(edge=>{
+        output +=
+        `${edge.u} - ${edge.v} : ${edge.w}\n`;
+    });
+
+    output +=
+    `\nTotal Cost = ${result.totalCost}`;
+
+    document.getElementById("output").textContent =
+        output;
+}
+
+</script>
+
+</body>
+</html>
