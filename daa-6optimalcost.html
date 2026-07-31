@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Chain Multiplication - Optimal Cost</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI', sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#d4fc79,#96e6a1);
+            padding:20px;
+        }
+
+        .container{
+            width:600px;
+            background:#ffffff;
+            padding:35px;
+            border-radius:18px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        h1{
+            text-align:center;
+            color:#2d6a4f;
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#555;
+            margin-bottom:25px;
+        }
+
+        label{
+            font-weight:600;
+            color:#333;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin-top:8px;
+            margin-bottom:20px;
+            border:2px solid #95d5b2;
+            border-radius:8px;
+            outline:none;
+            font-size:15px;
+        }
+
+        input:focus{
+            border-color:#2d6a4f;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#2d6a4f;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+            transition:0.3s;
+        }
+
+        button:hover{
+            background:#1b4332;
+        }
+
+        .result{
+            margin-top:25px;
+            padding:20px;
+            background:#f1fff4;
+            border-left:5px solid #2d6a4f;
+            border-radius:8px;
+            display:none;
+        }
+
+        .result h2{
+            color:#2d6a4f;
+            margin-bottom:10px;
+        }
+
+        .example{
+            margin-top:15px;
+            font-size:14px;
+            color:#666;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Matrix Chain Multiplication</h1>
+    <p class="subtitle">
+        Optimal Cost Computation using Dynamic Programming
+    </p>
+
+    <label>Enter Matrix Dimensions:</label>
+    <input type="text" id="dimensions"
+           placeholder="Example: 10,20,30,40,30">
+
+    <button onclick="calculateMCM()">
+        Compute Optimal Cost
+    </button>
+
+    <div class="result" id="resultBox">
+        <h2>Result</h2>
+        <p id="answer"></p>
+    </div>
+
+    <div class="example">
+        Example: If matrices are A(10×20), B(20×30),
+        C(30×40), D(40×30), enter:
+        <b>10,20,30,40,30</b>
+    </div>
+</div>
+
+<script>
+
+function matrixChainOrder(p) {
+
+    let n = p.length;
+    let dp = Array.from({length:n},
+             () => Array(n).fill(0));
+
+    for(let len = 2; len < n; len++) {
+
+        for(let i = 1; i < n - len + 1; i++) {
+
+            let j = i + len - 1;
+            dp[i][j] = Number.MAX_SAFE_INTEGER;
+
+            for(let k = i; k < j; k++) {
+
+                let cost =
+                    dp[i][k] +
+                    dp[k+1][j] +
+                    p[i-1] * p[k] * p[j];
+
+                if(cost < dp[i][j]) {
+                    dp[i][j] = cost;
+                }
+            }
+        }
+    }
+
+    return dp[1][n-1];
+}
+
+function calculateMCM() {
+
+    let input =
+        document.getElementById("dimensions").value;
+
+    let dimensions = input
+        .split(",")
+        .map(x => parseInt(x.trim()));
+
+    if(dimensions.length < 2 ||
+       dimensions.some(isNaN)) {
+
+        alert("Please enter valid dimensions.");
+        return;
+    }
+
+    let optimalCost =
+        matrixChainOrder(dimensions);
+
+    document.getElementById("resultBox").style.display = "block";
+
+    document.getElementById("answer").innerHTML =
+        "<strong>Minimum Number of Multiplications:</strong> "
+        + optimalCost;
+}
+
+</script>
+
+</body>
+</html>
