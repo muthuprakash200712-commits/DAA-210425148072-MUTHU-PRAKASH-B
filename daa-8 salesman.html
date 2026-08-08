@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traveling Salesman Problem - Branch and Bound</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#11998e,#38ef7d);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:95%;
+    max-width:1100px;
+    background:white;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.25);
+}
+
+h1{
+    text-align:center;
+    color:#0f766e;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#555;
+    margin-bottom:25px;
+}
+
+.controls{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input{
+    padding:10px;
+    width:100px;
+    border:2px solid #14b8a6;
+    border-radius:10px;
+    font-size:16px;
+}
+
+button{
+    padding:10px 20px;
+    border:none;
+    border-radius:10px;
+    background:#14b8a6;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+    margin-left:10px;
+}
+
+button:hover{
+    background:#0f766e;
+}
+
+.matrix{
+    overflow:auto;
+    margin-top:20px;
+}
+
+table{
+    border-collapse:collapse;
+    margin:auto;
+}
+
+td{
+    padding:5px;
+}
+
+td input{
+    width:70px;
+    text-align:center;
+}
+
+.result{
+    margin-top:25px;
+    background:#ecfeff;
+    border-left:6px solid #14b8a6;
+    padding:20px;
+    border-radius:10px;
+}
+
+.path{
+    color:#0f766e;
+    font-weight:bold;
+    font-size:20px;
+}
+
+.cost{
+    color:#dc2626;
+    font-weight:bold;
+    font-size:22px;
+}
+
+.info{
+    margin-top:20px;
+    background:#f0fdf4;
+    padding:15px;
+    border-radius:10px;
+    line-height:1.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🚚 Traveling Salesman Problem</h1>
+
+<p class="subtitle">
+Real-World Delivery Route Optimization using Branch and Bound
+</p>
+
+<div class="controls">
+    Number of Cities:
+    <input type="number" id="cities" value="4" min="2" max="8">
+    <button onclick="generateMatrix()">Generate Matrix</button>
+    <button onclick="solveTSP()">Find Optimal Route</button>
+</div>
+
+<div class="matrix">
+    <table id="matrixTable"></table>
+</div>
+
+<div id="output"></div>
+
+<div class="info">
+<b>Real-World Scenario:</b><br>
+A delivery truck starts from City 1, visits every city exactly once,
+and returns to the starting city. The goal is to minimize the total
+travel cost or distance.
+</div>
+
+</div>
+
+<script>
+
+generateMatrix();
+
+function generateMatrix(){
+
+    let n=parseInt(document.getElementById("cities").value);
+
+    let table=document.getElementById("matrixTable");
+    table.innerHTML="";
+
+    for(let i=0;i<n;i++){
+
+        let row=document.createElement("tr");
+
+        for(let j=0;j<n;j++){
+
+            let cell=document.createElement("td");
+            let input=document.createElement("input");
+
+            input.type="number";
+
+            if(i===j){
+                input.value=0;
+                input.disabled=true;
+            }
+            else{
+                input.value=Math.floor(Math.random()*40)+10;
+            }
+
+            input.id=`c${i}_${j}`;
+
+            cell.appendChild(input);
+            row.appendChild(cell);
+        }
+
+        table.appendChild(row);
+    }
+}
+
+function solveTSP(){
+
+    let n=parseInt(document.getElementById("cities").value);
+
+    let graph=[];
+
+    for(let i=0;i<n;i++){
+
+        graph[i]=[];
+
+        for(let j=0;j<n;j++){
+
+            graph[i][j]=parseInt(
+                document.getElementById(`c${i}_${j}`).value
+            );
+        }
+    }
+
+    let minCost=Infinity;
+    let bestPath=[];
+
+    function bound(path,cost){
+
+        let estimate=cost;
+
+        for(let city=0;city<n;city++){
+
+            if(!path.includes(city)){
+
+                let minEdge=Infinity;
+
+                for(let next=0;next<n;next++){
+
+                    if(city!==next)
+                        minEdge=Math.min(minEdge,graph[city][next]);
+                }
+
+                estimate+=minEdge;
+            }
+        }
+
+        return estimate;
+    }
+
+    function branchAndBound(path,visited,cost){
+
+        if(path.length===n){
+
+            let totalCost=
+                cost+
+                graph[path[path.length-1]][0];
+
+            if(totalCost<minCost){
+
+                minCost=totalCost;
+
+                bestPath=[
+                    ...path,
+                    0
+                ];
+            }
+
+            return;
+        }
+
+        if(bound(path,cost)>=minCost)
+            return;
+
+        let current=path[path.length-1];
+
+        for(let next=0;next<n;next++){
+
+            if(!visited[next]){
+
+                visited[next]=true;
+
+                path.push(next);
+
+                branchAndBound(
+                    path,
+                    visited,
+                    cost+graph[current][next]
+                );
+
+                path.pop();
+
+                visited[next]=false;
+            }
+        }
+    }
+
+    let visited=Array(n).fill(false);
+
+    visited[0]=true;
+
+    branchAndBound([0],visited,0);
+
+    let cityNames=bestPath.map(x=>"City "+(x+1));
+
+    document.getElementById("output").innerHTML=
+    `
+    <div class="result">
+        <h2>Optimal Route Found ✅</h2>
+        <br>
+
+        <div class="path">
+            Route:
+            ${cityNames.join(" ➜ ")}
+        </div>
+
+        <br>
+
+        <div class="cost">
+            Minimum Cost: ${minCost}
+        </div>
+
+        <br>
+
+        <p>
+        Branch and Bound explored only promising routes and
+        pruned expensive paths to efficiently find the optimal solution.
+        </p>
+    </div>
+    `;
+}
+
+</script>
+
+</body>
+</html>

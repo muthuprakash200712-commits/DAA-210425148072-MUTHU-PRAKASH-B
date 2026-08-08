@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N-Queens Solver</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    background:white;
+    width:90%;
+    max-width:900px;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    text-align:center;
+}
+
+h1{
+    color:#4b0082;
+    margin-bottom:20px;
+}
+
+.input-section{
+    margin-bottom:20px;
+}
+
+input{
+    width:120px;
+    padding:10px;
+    border:2px solid #667eea;
+    border-radius:10px;
+    font-size:18px;
+    text-align:center;
+}
+
+button{
+    padding:10px 20px;
+    margin-left:10px;
+    border:none;
+    border-radius:10px;
+    background:#667eea;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#4b59d1;
+    transform:scale(1.05);
+}
+
+.result{
+    margin:20px 0;
+    font-size:20px;
+    font-weight:bold;
+    color:#333;
+}
+
+#board{
+    display:inline-grid;
+    margin-top:20px;
+    border:4px solid #333;
+}
+
+.cell{
+    width:60px;
+    height:60px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:36px;
+}
+
+.white{
+    background:#f0d9b5;
+}
+
+.black{
+    background:#b58863;
+}
+
+.queen{
+    color:red;
+    font-weight:bold;
+}
+
+.info{
+    margin-top:20px;
+    padding:15px;
+    background:#eef2ff;
+    border-radius:10px;
+    color:#333;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>♛ N-Queens Solver Using Backtracking ♛</h1>
+
+    <div class="input-section">
+        <input type="number" id="n" min="1" value="8">
+        <button onclick="solveNQueens()">Solve</button>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <div id="board"></div>
+
+    <div class="info">
+        Enter N and click <b>Solve</b>.<br>
+        The program displays one valid arrangement and the total number of possible solutions.
+    </div>
+
+</div>
+
+<script>
+
+let totalSolutions = 0;
+let firstSolution = null;
+
+function isSafe(board,row,col,n){
+
+    for(let i=0;i<col;i++){
+        if(board[row][i]===1)
+            return false;
+    }
+
+    for(let i=row,j=col;i>=0 && j>=0;i--,j--){
+        if(board[i][j]===1)
+            return false;
+    }
+
+    for(let i=row,j=col;i<n && j>=0;i++,j--){
+        if(board[i][j]===1)
+            return false;
+    }
+
+    return true;
+}
+
+function solveAll(board,col,n){
+
+    if(col===n){
+
+        totalSolutions++;
+
+        if(firstSolution===null){
+            firstSolution = board.map(row => [...row]);
+        }
+
+        return;
+    }
+
+    for(let row=0;row<n;row++){
+
+        if(isSafe(board,row,col,n)){
+
+            board[row][col]=1;
+
+            solveAll(board,col+1,n);
+
+            board[row][col]=0;
+        }
+    }
+}
+
+function solveNQueens(){
+
+    let n=parseInt(document.getElementById("n").value);
+
+    if(n<=0){
+        alert("Enter a valid value of N");
+        return;
+    }
+
+    let board=Array(n).fill().map(()=>Array(n).fill(0));
+
+    totalSolutions=0;
+    firstSolution=null;
+
+    solveAll(board,0,n);
+
+    let result=document.getElementById("result");
+
+    if(totalSolutions===0){
+
+        result.innerHTML=`❌ No solution exists for N = ${n}`;
+        document.getElementById("board").innerHTML="";
+        return;
+    }
+
+    result.innerHTML=
+    `✅ Total Solutions for N = ${n}: <span style="color:#4b0082">${totalSolutions}</span>`;
+
+    displayBoard(firstSolution,n);
+}
+
+function displayBoard(board,n){
+
+    let boardDiv=document.getElementById("board");
+
+    boardDiv.innerHTML="";
+
+    boardDiv.style.gridTemplateColumns=`repeat(${n},60px)`;
+
+    for(let i=0;i<n;i++){
+
+        for(let j=0;j<n;j++){
+
+            let cell=document.createElement("div");
+
+            cell.classList.add("cell");
+
+            if((i+j)%2===0)
+                cell.classList.add("white");
+            else
+                cell.classList.add("black");
+
+            if(board[i][j]===1){
+                cell.innerHTML="♛";
+                cell.classList.add("queen");
+            }
+
+            boardDiv.appendChild(cell);
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>

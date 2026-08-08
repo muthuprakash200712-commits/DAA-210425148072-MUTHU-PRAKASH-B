@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bin Packing - Approximation Algorithm</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#ff9966,#ff5e62);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:90%;
+    max-width:1000px;
+    background:white;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+h1{
+    text-align:center;
+    color:#e63946;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#555;
+    margin-bottom:20px;
+}
+
+.input-box{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input{
+    padding:10px;
+    width:250px;
+    border:2px solid #ff5e62;
+    border-radius:10px;
+    margin:10px;
+}
+
+button{
+    padding:10px 20px;
+    border:none;
+    border-radius:10px;
+    background:#ff5e62;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#e63946;
+}
+
+.result{
+    margin-top:20px;
+}
+
+.bin{
+    background:#f1faee;
+    border-left:6px solid #2a9d8f;
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+}
+
+.summary{
+    margin-top:20px;
+    padding:15px;
+    background:#fff3cd;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.info{
+    margin-top:20px;
+    background:#eef7ff;
+    padding:15px;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📦 Bin Packing Problem</h1>
+
+<p class="subtitle">
+Efficient Bin Packing using First-Fit Decreasing Approximation Algorithm
+</p>
+
+<div class="input-box">
+
+<label>Bin Capacity:</label><br>
+<input type="number" id="capacity" value="10"><br>
+
+<label>Item Sizes (comma separated):</label><br>
+<input type="text" id="items"
+value="8,5,7,2,4,1,6,3"><br>
+
+<button onclick="solveBinPacking()">
+Pack Items
+</button>
+
+</div>
+
+<div id="output"></div>
+
+<div class="info">
+<b>Real World Example:</b><br>
+A warehouse wants to pack products into boxes.
+Each box has a fixed capacity.
+The goal is to use as few boxes as possible while fitting all items.
+</div>
+
+</div>
+
+<script>
+
+function solveBinPacking(){
+
+    let capacity =
+    parseInt(document.getElementById("capacity").value);
+
+    let items =
+    document.getElementById("items").value
+    .split(",")
+    .map(Number);
+
+    items.sort((a,b)=>b-a);
+
+    let bins=[];
+
+    for(let item of items){
+
+        let placed=false;
+
+        for(let bin of bins){
+
+            let used=
+            bin.reduce((a,b)=>a+b,0);
+
+            if(used + item <= capacity){
+
+                bin.push(item);
+
+                placed=true;
+
+                break;
+            }
+        }
+
+        if(!placed){
+
+            bins.push([item]);
+        }
+    }
+
+    let html="<div class='result'>";
+
+    bins.forEach((bin,index)=>{
+
+        let used=
+        bin.reduce((a,b)=>a+b,0);
+
+        html+=`
+        <div class="bin">
+        <b>Bin ${index+1}</b><br>
+        Items: ${bin.join(", ")}<br>
+        Used Capacity: ${used}/${capacity}
+        </div>
+        `;
+    });
+
+    html+=`
+    <div class="summary">
+    Total Bins Used: ${bins.length}
+    </div>
+    `;
+
+    html+="</div>";
+
+    document.getElementById("output").innerHTML=html;
+}
+
+</script>
+
+</body>
+</html>

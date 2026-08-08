@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Randomized Quick Sort Visualizer</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#4facfe,#00f2fe);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    background:white;
+    width:90%;
+    max-width:1000px;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+}
+
+h1{
+    text-align:center;
+    color:#2563eb;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#555;
+    margin-bottom:20px;
+}
+
+.input-section{
+    text-align:center;
+}
+
+input{
+    width:400px;
+    max-width:90%;
+    padding:12px;
+    border:2px solid #2563eb;
+    border-radius:10px;
+    margin:10px;
+}
+
+button{
+    padding:12px 20px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.result{
+    margin-top:25px;
+    padding:20px;
+    background:#eff6ff;
+    border-radius:15px;
+}
+
+.box{
+    margin-top:15px;
+    padding:15px;
+    background:white;
+    border-left:6px solid #2563eb;
+    border-radius:10px;
+}
+
+.label{
+    font-weight:bold;
+    color:#1e40af;
+}
+
+.info{
+    margin-top:20px;
+    padding:15px;
+    background:#ecfdf5;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>⚡ Randomized Quick Sort</h1>
+
+<p class="subtitle">
+Improving Quick Sort Efficiency Using a Randomized Algorithm
+</p>
+
+<div class="input-section">
+
+<input type="text"
+id="numbers"
+value="45,12,78,34,23,90,11,67,55">
+
+<br>
+
+<button onclick="runQuickSort()">
+Sort Numbers
+</button>
+
+</div>
+
+<div id="output"></div>
+
+<div class="info">
+<b>Real-World Scenario:</b><br>
+Large databases, search engines, e-commerce platforms and analytics systems
+need fast sorting. Randomized Quick Sort reduces the chance of worst-case
+performance by selecting a random pivot.
+</div>
+
+</div>
+
+<script>
+
+let comparisonCount = 0;
+
+function randomizedQuickSort(arr, low, high){
+
+    if(low < high){
+
+        let pivotIndex =
+        randomPartition(arr, low, high);
+
+        randomizedQuickSort(arr, low, pivotIndex - 1);
+
+        randomizedQuickSort(arr, pivotIndex + 1, high);
+    }
+}
+
+function randomPartition(arr, low, high){
+
+    let randomIndex =
+    Math.floor(Math.random() * (high - low + 1))
+    + low;
+
+    [arr[randomIndex], arr[high]] =
+    [arr[high], arr[randomIndex]];
+
+    return partition(arr, low, high);
+}
+
+function partition(arr, low, high){
+
+    let pivot = arr[high];
+
+    let i = low - 1;
+
+    for(let j = low; j < high; j++){
+
+        comparisonCount++;
+
+        if(arr[j] <= pivot){
+
+            i++;
+
+            [arr[i], arr[j]] =
+            [arr[j], arr[i]];
+        }
+    }
+
+    [arr[i+1], arr[high]] =
+    [arr[high], arr[i+1]];
+
+    return i + 1;
+}
+
+function runQuickSort(){
+
+    comparisonCount = 0;
+
+    let input =
+    document.getElementById("numbers").value;
+
+    let arr =
+    input.split(",")
+    .map(Number);
+
+    let original = [...arr];
+
+    randomizedQuickSort(
+        arr,
+        0,
+        arr.length - 1
+    );
+
+    document.getElementById("output").innerHTML =
+
+    `<div class="result">
+
+        <div class="box">
+            <span class="label">Original Array:</span><br>
+            ${original.join(", ")}
+        </div>
+
+        <div class="box">
+            <span class="label">Sorted Array:</span><br>
+            ${arr.join(", ")}
+        </div>
+
+        <div class="box">
+            <span class="label">Comparisons Performed:</span><br>
+            ${comparisonCount}
+        </div>
+
+        <div class="box">
+            <span class="label">Algorithm Used:</span><br>
+            Randomized Quick Sort
+        </div>
+
+    </div>`;
+}
+
+</script>
+
+</body>
+</html>
